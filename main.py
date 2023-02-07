@@ -1,20 +1,22 @@
-import config
-
-
 from telebot import TeleBot
-from telebot import types
-from telebot.types import Message
-from states import States
 from telebot import custom_filters
+from telebot import types
+from telebot.types import Message, CallbackQuery
 
+import config
+from states import States
 
 bot = TeleBot(config.Telegram_Token)
 
 
-markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-option1 = types.KeyboardButton("sss")
-option2 = types.KeyboardButton("aaa")
-option3 = types.KeyboardButton("ddd")
+def gen_markup():
+    markup = types.InlineKeyboardMarkup()
+    markup.row_width = 3
+    markup.add(types.InlineKeyboardButton("option1", callback_data="option1"),
+               types.InlineKeyboardButton("option2", callback_data="option2"),
+               types.InlineKeyboardButton("option3", callback_data="option3"))
+
+    return markup
 
 
 @bot.message_handler(commands=['start'])
@@ -25,24 +27,17 @@ def say_hello(message: Message):
                      "Don’t be afraid, you can be honest with me.\n" +
                      "\n" +
                      "I can also give you free advice based on your mood. \n" +
-                     "Now you could see the options that we can provide.", reply_markup=markup)
-
-    markup.add(option1, option2, option3)
-
-    bot.set_state(message.from_user.id, States.choose_option)
+                     "Now you could see the options that we can provide.", reply_markup=gen_markup())
 
 
-@bot.message_handler(state=States.choose_option)
-def chose_option_stage(message: Message):
-    if message.text == option1.text:
-        bot.send_message(message.chat.id, "sss")
-        bot.set_state(message.from_user.id, States.first_option)
-    elif message.text == option2:
-        bot.send_message(message.chat.id, "aaa")
-        bot.set_state(message.from_user.id, States.second_option)
+@bot.callback_query_handler(func=lambda call: True)
+def button_callback(callback: CallbackQuery):
+    if callback.data == "option1":
+        bot.send_message(callback.message.chat.id, "option1")
+    elif callback == "option2":
+        bot.send_message(callback.message.chat.id, "option2")
     else:
-        bot.send_message(message.chat.id, "ddd")
-        bot.set_state(message.from_user.id, States.third_option)
+        bot.send_message(callback.message.chat.id, "option3")
 
 
 def main():
