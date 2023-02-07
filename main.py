@@ -33,11 +33,46 @@ def say_hello(message: Message):
 @bot.callback_query_handler(func=lambda call: True)
 def button_callback(callback: CallbackQuery):
     if callback.data == "option1":
-        bot.send_message(callback.message.chat.id, "option1")
+        bot.send_message(callback.message.chat.id, "Let's start the questionary!")
+        bot.set_state(callback.message.from_user.id, States.first_question, callback.message.chat.id)
+        bot.send_message(callback.message.chat.id, "Asking first question////")
     elif callback == "option2":
         bot.send_message(callback.message.chat.id, "option2")
     else:
         bot.send_message(callback.message.chat.id, "option3")
+
+
+@bot.message_handler(state=States.first_question)
+def first_question(message: Message):
+    bot.set_state(message.from_user.id, States.second_question, message.chat.id)
+    with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
+        data['first_question_answer'] = message.text
+
+
+@bot.message_handler(state=States.second_question)
+def first_question(message: Message):
+    bot.send_message(message.chat.id, "Asking second question////")
+    bot.set_state(message.from_user.id, States.third_question, message.chat.id)
+    with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
+        data['second_question_answer'] = message.text
+
+
+@bot.message_handler(state=States.third_question)
+def first_question(message: Message):
+    bot.send_message(message.chat.id, "Asking third question////")
+    with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
+        msg = (f"<b>First question answer: {data['first_question_answer']}\n"
+               f"Second question answer: {data['second_question_answer']}\n"
+               f"Third question answer: {message.text}</b>")
+        bot.send_message(message.chat.id, msg, parse_mode='html')
+
+    bot.delete_state(message.from_user.id, message.chat.id)
+
+
+@bot.message_handler(state="*", commands=['cancel'])
+def stop_asking(message: Message):
+    bot.send_message(message.chat.id, "Okay, you could start again, whenever you want.")
+    bot.delete_state(message.from_user.id, message.chat.id)
 
 
 def main():
