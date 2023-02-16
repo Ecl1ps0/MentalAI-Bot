@@ -12,21 +12,22 @@ bot = TeleBot(config.Telegram_Token)
 def gen_markup():
     markup = types.InlineKeyboardMarkup()
     markup.row_width = 3
-    markup.add(types.InlineKeyboardButton("option1", callback_data="option1"),
-               types.InlineKeyboardButton("option2", callback_data="option2"),
-               types.InlineKeyboardButton("option3", callback_data="option3"))
-
+    markup.add(types.InlineKeyboardButton("Authors", callback_data="option1"),
+               types.InlineKeyboardButton("Mental State history", callback_data="option2"),
+               types.InlineKeyboardButton("Mood types", callback_data="option3"))
     return markup
 
 
 @bot.message_handler(commands=['start'])
 def say_hello(message: Message):
-    bot.send_message(message.chat.id, f"Welcome dear {message.from_user.first_name}! \n" +
-                     "I can establish your mood and mental state by your response on a simple question:\n" +
-                     "How was your day?\n" +
-                     "Don’t be afraid, you can be honest with me.\n" +
+    bot.send_message(message.chat.id, f"Welcome, dear {message.from_user.first_name}! \n" +
+                     "I can predict your mental health based on your response on the following prompt:\n" +
+                     "Describe your life in the last 24 hours\n" +
+                     "Don’t be afraid, you can be honest with me.\n"
+                     "In fact, please provide more details, it would help\n" +
+                     "to predict and establish your mental health state more accurately\n" +
                      "\n" +
-                     "I can also give you free advice based on your mood. \n" +
+                     "I will provide helpful advice for you based on your mood. \n" +
                      "Now you could see the options that we can provide.", reply_markup=gen_markup())
 
 
